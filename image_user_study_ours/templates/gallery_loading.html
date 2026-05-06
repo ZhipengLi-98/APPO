@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading Next Iteration...</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f3e5f5, #e1f5fe);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .spinner {
+            border: 6px solid #eee;
+            border-top: 6px solid #7b1fa2;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        p {
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: #666;
+        }
+    </style>
+    <script>
+        async function checkStatus() {
+            try {
+                const res = await fetch("/status");
+                const data = await res.json();
+                if (data.ready) {
+                    window.location.href = "/gallery"; // reload gallery when ready
+                } else {
+                    setTimeout(checkStatus, 2000);
+                }
+            } catch (err) {
+                console.error("Status check failed", err);
+                setTimeout(checkStatus, 3000); // retry after delay
+            }
+        }
+        window.onload = checkStatus;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Generating next iteration, please wait...</h1>
+        <div class="spinner"></div>
+        <p>This may take a few seconds...</p>
+    </div>
+</body>
+</html>

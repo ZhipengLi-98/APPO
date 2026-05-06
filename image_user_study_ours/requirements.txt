@@ -1,0 +1,13 @@
+flask
+torch
+diffusers
+transformers
+accelerate
+safetensors
+pillow
+requests
+numpy
+scikit-learn
+scipy
+sentence-transformers
+tqdm

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stable Diffusion Iteration</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #e1bee7);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 12px 16px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #7b1fa2;
+        }
+
+        button {
+            margin-top: 1.5rem;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: #7b1fa2;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s ease;
+        }
+
+        button:hover {
+            background: #9c27b0;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        /* Tag styles */
+        .tags {
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tag {
+            background: #e1bee7;
+            color: #7b1fa2;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .tag.selected {
+            background: #7b1fa2;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enter a Base Prompt</h1>
+        <form method="POST" id="prompt-form">
+            <input type="text" name="prompt" id="prompt-input" placeholder="Enter a prompt...">
+            <!-- Word count element -->
+            <p id="word-count" style="margin-top: 0.5rem; color: #555;">word count: 0/60</p>
+            <p class="instruction">
+                Select at least three objects from the following, then enrich your prompt with vivid details — 
+                such as atmosphere, style, lighting, or emotions — to bring the scene to life.
+            </p>
+            <div class="tags" id="tag-container">
+                <!-- Tags will be inserted here -->
+            </div>
+            <button type="submit">Generate</button>
+        </form>
+    </div>
+
+    <script>
+        const tags = [
+            "cat", "dog", "mountain", "sunset", "forest", "ocean", "city",
+            "robot", "space", "flower", "castle", "car", "bird", "dragon",
+            "river", "tree", "snow", "beach", "guitar", "rain"
+        ];
+
+        const tagContainer = document.getElementById('tag-container');
+        const promptInput = document.getElementById('prompt-input');
+
+        // Maintain a Set of selected tags
+        const selectedTags = new Set();
+
+        const MAX_WORDS = 60;
+        const wordCountEl = document.getElementById('word-count');
+
+        function updateWordCount() {
+            const words = promptInput.value.trim().split(/\s+/).filter(w => w.length > 0);
+            const count = words.length;
+            
+            wordCountEl.textContent = `word count: ${count}/${MAX_WORDS}`;
+            wordCountEl.style.color = count > MAX_WORDS ? 'red' : '#555';
+        }
+
+        // Update when typing
+        promptInput.addEventListener('input', updateWordCount);
+
+        // Update when clicking tags
+        tags.forEach(tag => {
+            const tagEl = document.createElement('div');
+            tagEl.classList.add('tag');
+            tagEl.textContent = tag;
+
+            tagEl.addEventListener('click', () => {
+                if (selectedTags.has(tag)) {
+                    selectedTags.delete(tag);
+                    tagEl.classList.remove('selected');
+                } else {
+                    selectedTags.add(tag);
+                    tagEl.classList.add('selected');
+                }
+                // Update input field
+                promptInput.value = Array.from(selectedTags).join(', ');
+                // Update word count
+                updateWordCount();
+            });
+
+            tagContainer.appendChild(tagEl);
+        });
+    </script>
+</body>
+</html>

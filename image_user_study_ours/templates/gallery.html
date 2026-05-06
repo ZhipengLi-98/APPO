@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generated Images</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px; /* tighter spacing */
+            max-width: 1000px; /* restrict total width */
+            justify-items: center;
+            margin: 0 auto; /* center */
+        }
+
+        .item {
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .item.selected {
+            border: 4px solid #00aaff; /* brighter blue */
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.9); /* glowing effect */
+            transform: scale(1.05); /* zoom effect */
+        }
+
+        img {
+            width: 320px;
+            height: 320px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            font-size: 22px;       /* larger text */
+            padding: 16px 40px;    /* bigger button */
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 8px;    /* slightly bigger rounded corners */
+            border: none;
+            background-color: #1e90ff;
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        button:hover:enabled {
+            background-color: #0d6efd;
+        }
+
+        @media (max-width: 1000px) {
+            img { width: 280px; height: 280px; }
+        }
+        @media (max-width: 700px) {
+            .gallery { grid-template-columns: repeat(2, 1fr); }
+            img { width: 250px; height: 250px; }
+        }
+        @media (max-width: 500px) {
+            .gallery { grid-template-columns: 1fr; }
+            img { width: 90%; height: auto; }
+        }
+    </style>
+    <script>
+        function toggleSelection(el) {
+            el.classList.toggle("selected");
+            const checkbox = el.querySelector("input[type=checkbox]");
+            checkbox.checked = !checkbox.checked;
+            updateButtons();
+        }
+
+        function updateButtons() {
+            const checkboxes = document.querySelectorAll('input[type=checkbox]');
+            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+            document.getElementById("nextButton").disabled = !anyChecked;
+            document.getElementById("satisfiedButton").disabled = !anyChecked;
+        }
+
+        function submitSatisfied() {
+            const form = document.getElementById("galleryForm");
+            let input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "satisfied";
+            input.value = "true";
+            form.appendChild(input);
+            form.submit();
+        }
+
+        window.onload = updateButtons;
+    </script>
+</head>
+<body>
+    <h1 style="text-align: center; margin-bottom: 40px;">Select your preferred images</h1>
+    <h2>Iteration {{ iteration }}</h2>   <!-- NEW LINE -->
+
+    <!-- Gallery container (centered) -->
+    <div style="display: flex; justify-content: center; position: relative; max-width: 1200px; margin: 0 auto;">
+
+        <!-- Gallery centered -->
+        <form id="galleryForm" method="POST" style="">
+            <div class="gallery" style="
+                display: grid; 
+                grid-template-columns: repeat(3, 1fr); 
+                gap: 15px;
+            ">
+                {% for filename, prompt in images %}
+                <div class="item" onclick="toggleSelection(this)" style="cursor: pointer; border: 2px solid transparent; border-radius: 10px; overflow: hidden;">
+                    <img src="{{ url_for('static', filename='generated/' + filename) }}" alt="Generated image" style="width: 100%; height: auto; display: block;">
+                    <input type="checkbox" name="selected" value="{{ filename }}" style="display:none;">
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Initial prompt (outside gallery container) -->
+    <div style="
+        position: absolute;
+        top: 150px; /* adjust vertically */
+        left: 200px; /* distance from left edge of page */
+        width: 400px;
+        text-align: left;
+        font-size: 18px;
+        line-height: 1.5;
+        background-color: #eef2f5;
+        padding: 25px;
+        border-radius: 10px;
+    ">
+        <strong>Initial Prompt:</strong>
+        <p>{{ initial_prompt }}</p>
+    </div>
+
+
+    <!-- Buttons (right side, absolute) -->
+    <div style="
+        position: absolute;
+        top: 500px; /* align vertically with gallery */
+        right: 300px; /* distance from right edge of page */
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    ">
+        <button type="submit" form="galleryForm" id="nextButton" disabled
+            style="font-size: 26px; padding: 20px 50px; border-radius: 12px;">
+            I want to see more
+        </button>
+        <button type="button" id="satisfiedButton" onclick="submitSatisfied()" disabled
+            style="font-size: 26px; padding: 20px 50px; border-radius: 12px;">
+            I'm satisfied
+        </button>
+    </div>
+    <script>
+        function toggleSelection(item) {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+
+            // Apply or remove the "selected" class for strong effect
+            if (checkbox.checked) {
+                item.classList.add("selected");
+            } else {
+                item.classList.remove("selected");
+            }
+
+            // Enable/disable buttons based on any selection
+            const anyChecked = document.querySelectorAll('.gallery input:checked').length > 0;
+            document.getElementById('nextButton').disabled = !anyChecked;
+            document.getElementById('satisfiedButton').disabled = !anyChecked;
+        }
+
+        function submitSatisfied() {
+            const form = document.getElementById("galleryForm");
+            let input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "satisfied";
+            input.value = "true";
+            form.appendChild(input);
+            form.submit();
+        }
+
+        window.onload = function() {
+            const checkboxes = document.querySelectorAll('input[type=checkbox]');
+            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+            document.getElementById("nextButton").disabled = !anyChecked;
+            document.getElementById("satisfiedButton").disabled = !anyChecked;
+        }
+    </script>
+</body>
+</html>
